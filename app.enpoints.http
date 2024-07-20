@@ -1,2 +1,9 @@
 ## Get Request For App controller
 GET http://localhost:3000/
+
+
+## create users
+POST http://localhost:3000/users
+{
+    
+}
