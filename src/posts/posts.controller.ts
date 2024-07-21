@@ -5,12 +5,12 @@ import {
     Get,
     Param,
     Patch,
-    Post,
+    Post
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsService } from './posts.service';
-import { ApiTags } from '@nestjs/swagger';
 
 @Controller('posts')
 @ApiTags('Posts')
