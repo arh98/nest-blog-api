@@ -1,6 +1,7 @@
 import { applyDecorators, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 export function getUsersDecorators() {
     return applyDecorators(
@@ -69,12 +70,12 @@ export function patchUserDecorators() {
         }),
         ApiBody({
             description: 'The updated user data,',
-            type: CreateUserDto,
+            type: UpdateUserDto,
         }),
         ApiResponse({
             status: 200,
             description: 'The user has been updated successfully.',
-            type: CreateUserDto,
+            type: UpdateUserDto,
         }),
         ApiResponse({
             status: 400,
