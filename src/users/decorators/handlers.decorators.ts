@@ -1,5 +1,13 @@
 import { applyDecorators, Delete, Get, Patch, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+    ApiBadRequestResponse,
+    ApiBody,
+    ApiCreatedResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiParam,
+} from '@nestjs/swagger';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
@@ -10,8 +18,7 @@ export function getUsersDecorators() {
             description:
                 'Fetches a list of registered users on the application.',
         }),
-        ApiResponse({
-            status: 200,
+        ApiOkResponse({
             description: 'Users fetched successfully based on the query',
         }),
         Get(),
@@ -24,12 +31,10 @@ export function getUserDecorators() {
             summary: 'Fetches a user by id ',
             description: 'Fetches a registered user by id on the application.',
         }),
-        ApiResponse({
-            status: 200,
+        ApiOkResponse({
             description: 'User fetched successfully based on the query',
         }),
-        ApiResponse({
-            status: 404,
+        ApiNotFoundResponse({
             description: 'The user with the specified ID was not found.',
         }),
         Get(':id'),
@@ -43,13 +48,11 @@ export function postUserDecorators() {
             summary: 'Create a new user',
             description: 'This endpoint creates a new user in the system.',
         }),
-        ApiResponse({
-            status: 201,
+        ApiCreatedResponse({
             description: 'The user has been created successfully.',
             type: CreateUserDto,
         }),
-        ApiResponse({
-            status: 400,
+        ApiBadRequestResponse({
             description: 'Bad request. The provided data is invalid.',
         }),
     );
@@ -72,17 +75,14 @@ export function patchUserDecorators() {
             description: 'The updated user data,',
             type: UpdateUserDto,
         }),
-        ApiResponse({
-            status: 200,
+        ApiOkResponse({
             description: 'The user has been updated successfully.',
             type: UpdateUserDto,
         }),
-        ApiResponse({
-            status: 400,
+        ApiBadRequestResponse({
             description: 'Bad request. The provided data is invalid.',
         }),
-        ApiResponse({
-            status: 404,
+        ApiNotFoundResponse({
             description: 'The user with the specified ID was not found.',
         }),
     );
@@ -102,12 +102,10 @@ export function deleteUserDecorators() {
             description: 'The ID of the user to delete',
             example: '123456',
         }),
-        ApiResponse({
-            status: 200,
+        ApiOkResponse({
             description: 'The user has been deleted successfully.',
         }),
-        ApiResponse({
-            status: 404,
+        ApiNotFoundResponse({
             description: 'The user with the specified ID was not found.',
         }),
     );
