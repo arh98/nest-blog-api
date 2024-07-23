@@ -3,6 +3,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
 
 /**
  * Service for managing user-related operations.
@@ -13,6 +16,9 @@ export class UsersService {
      * Constructs a new instance of the UsersService.
      */
     constructor(
+        @InjectRepository(User)
+        private readonly usersRepo: Repository<User>,
+
         @Inject(forwardRef(() => AuthService))
         private readonly authService: AuthService,
     ) {}
@@ -20,8 +26,22 @@ export class UsersService {
     /**
      * Creates a new user.
      */
-    create(dto: CreateUserDto): string {
-        return 'This action adds a new user';
+    async create(dto: CreateUserDto) {
+        const existingUser = await this.usersRepo.findOne({
+            where: { email: dto.email },
+        });
+
+        /**
+         * Handle exceptions if user exists later
+         * */
+
+        // Try to create a new user
+        // - Handle Exceptions Later
+        let newUser = this.usersRepo.create(dto);
+        newUser = await this.usersRepo.save(newUser);
+
+        // Create the user
+        return newUser;
     }
 
     /**
