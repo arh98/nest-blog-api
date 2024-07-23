@@ -1,6 +1,0 @@
-## Get Request For App controller
-GET http://localhost:3000/
-
-
-## create users
-GET http://localhost:3000/posts

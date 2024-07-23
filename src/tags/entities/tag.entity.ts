@@ -9,8 +9,8 @@ import {
 
 @Entity()
 export class Tag {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column({
         type: 'varchar',

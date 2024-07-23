@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostType } from '../enums/post-type.enum';
-import { CreateMetaOptionDto } from './create-meta-option.dto';
+import { CreateMetaOptionDto } from '../../meta-options/dto/create-meta-option.dto';
 import { Type } from 'class-transformer';
 
 export class CreatePostDto {
