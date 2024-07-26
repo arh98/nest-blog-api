@@ -3,6 +3,8 @@ import {
     Column,
     Entity,
     JoinColumn,
+    JoinTable,
+    ManyToMany,
     ManyToOne,
     OneToOne,
     PrimaryGeneratedColumn,
@@ -10,6 +12,7 @@ import {
 import { PostStatus } from '../enums/post-status.enum';
 import { PostType } from '../enums/post-type.enum';
 import { User } from 'src/users/entities/user.entity';
+import { Tag } from 'src/tags/entities/tag.entity';
 
 @Entity()
 export class Post {
@@ -68,7 +71,9 @@ export class Post {
     })
     publishOn?: Date;
 
-    tags?: string[];
+    @ManyToMany(() => Tag, (tag) => tag.posts)
+    @JoinTable()
+    tags?: Tag[];
 
     @OneToOne(() => MetaOption, (metaOptions) => metaOptions.post, {
         cascade: true,

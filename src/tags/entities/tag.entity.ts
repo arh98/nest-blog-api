@@ -1,10 +1,12 @@
+import { Post } from 'src/posts/entities/post.entity';
 import {
     Column,
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
+    ManyToMany,
     PrimaryGeneratedColumn,
-    UpdateDateColumn,
+    UpdateDateColumn
 } from 'typeorm';
 
 @Entity()
@@ -54,4 +56,7 @@ export class Tag {
     // Add this decorartor and column enables soft delete
     @DeleteDateColumn()
     deletedAt: Date;
+
+    @ManyToMany(() => Post, (post) => post.tags)
+    posts: Post[];
 }

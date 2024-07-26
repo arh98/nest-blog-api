@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
+import { TagsService } from 'src/tags/tags.service';
 
 @Injectable()
 export class PostsService {
@@ -12,12 +13,15 @@ export class PostsService {
         @InjectRepository(Post)
         private readonly postRepo: Repository<Post>,
         private readonly userService: UsersService,
+        private readonly tagsService: TagsService,
     ) {}
 
     async create(dto: CreatePostDto) {
         const author = await this.userService.findOne(dto.authorId);
+        const tags = await this.tagsService.findMultiple(dto.tags);
+        
         return await this.postRepo.save(
-            this.postRepo.create({ ...dto, author }),
+            this.postRepo.create({ ...dto, author , tags }),
         );
     }
 
