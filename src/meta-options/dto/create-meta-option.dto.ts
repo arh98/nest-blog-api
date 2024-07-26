@@ -7,5 +7,5 @@ export class CreateMetaOptionDto {
     })
     @IsNotEmpty()
     @IsJSON()
-    value: string;
+    metaValue: string;
 }
