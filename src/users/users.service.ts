@@ -55,7 +55,7 @@ export class UsersService {
      * Fetches a user by their ID.
      */
     findOne(id: number) {
-        return `This action returns a #${id} user`;
+        return this.usersRepo.findOneBy({ id });
     }
 
     /**

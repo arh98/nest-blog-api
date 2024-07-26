@@ -3,6 +3,7 @@ import {
     IsArray,
     IsDate,
     IsEnum,
+    IsInt,
     IsJSON,
     IsNotEmpty,
     IsOptional,
@@ -120,4 +121,12 @@ export class CreatePostDto {
     @ValidateNested({ each: true })
     @Type(() => CreateMetaOptionDto)
     metaOptions?: CreateMetaOptionDto | null;
+
+    @ApiProperty({
+        type: 'integer',
+        required: true,
+        example: 1, })
+    @IsNotEmpty()
+    @IsInt()
+    authorId: number;
 }

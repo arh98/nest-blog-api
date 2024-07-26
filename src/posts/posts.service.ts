@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MetaOption } from 'src/meta-options/entities/meta-option.entity';
+import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -11,12 +11,14 @@ export class PostsService {
     constructor(
         @InjectRepository(Post)
         private readonly postRepo: Repository<Post>,
-        @InjectRepository(MetaOption)
-        private readonly metaOptsRepo: Repository<MetaOption>,
+        private readonly userService: UsersService,
     ) {}
 
     async create(dto: CreatePostDto) {
-        return await this.postRepo.save(this.postRepo.create({ ...dto }));
+        const author = await this.userService.findOne(dto.authorId);
+        return await this.postRepo.save(
+            this.postRepo.create({ ...dto, author }),
+        );
     }
 
     findAll() {
