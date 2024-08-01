@@ -23,6 +23,7 @@
   "dependencies": {
     "@compodoc/compodoc": "^1.1.25",
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",

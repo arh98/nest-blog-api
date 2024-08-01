@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from 'src/modules/auth/auth.service';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
