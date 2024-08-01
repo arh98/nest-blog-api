@@ -37,7 +37,11 @@ export class TagsService {
         return `This action updates a #${id} tag`;
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} tag`;
+    async remove(id: number) {
+        return await this.TagsRepo.delete(id);
+    }
+
+    async softRemove(id: number) {
+        return await this.TagsRepo.softDelete(id);
     }
 }

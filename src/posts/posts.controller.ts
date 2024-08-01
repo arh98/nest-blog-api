@@ -1,4 +1,4 @@
-import { Body, Controller, Param } from '@nestjs/common';
+import { Body, Controller, Param, ParseIntPipe } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
     createPostDecorators,
@@ -27,13 +27,13 @@ export class PostsController {
     }
 
     @getPostDecorators()
-    findOne(@Param('id') id: string) {
-        return this.postsService.findOne(+id);
+    findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.postsService.findOne(id);
     }
 
     @patchPostDecorators()
-    update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
-        return this.postsService.update(+id, dto);
+    update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePostDto) {
+        return this.postsService.update(id, dto);
     }
 
     @deletePostDecorators()

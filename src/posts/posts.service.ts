@@ -19,9 +19,9 @@ export class PostsService {
     async create(dto: CreatePostDto) {
         const author = await this.userService.findOne(dto.authorId);
         const tags = await this.tagsService.findMultiple(dto.tags);
-        
+
         return await this.postRepo.save(
-            this.postRepo.create({ ...dto, author , tags }),
+            this.postRepo.create({ ...dto, author, tags }),
         );
     }
 
@@ -37,8 +37,22 @@ export class PostsService {
         return post;
     }
 
-    update(id: number, dto: UpdatePostDto) {
-        return `This action updates a #${id} post`;
+    async update(id: number, dto: UpdatePostDto) {
+        const post = await this.findOne(id);
+        const tags =
+            dto.tags && (await this.tagsService.findMultiple(dto.tags));
+
+        post.title = dto.title ?? post.title;
+        post.content = dto.content ?? post.content;
+        post.status = dto.status ?? post.status;
+        post.postType = dto.postType ?? post.postType;
+        post.slug = dto.slug ?? post.slug;
+        post.featuredImageUrl = dto.featuredImageUrl ?? post.featuredImageUrl;
+        post.publishOn = dto.publishOn ?? post.publishOn;
+
+        if (tags) post.tags = tags;
+
+        return await this.postRepo.save(post);
     }
 
     async remove(id: number) {

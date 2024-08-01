@@ -6,7 +6,7 @@ import {
     Entity,
     ManyToMany,
     PrimaryGeneratedColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -57,6 +57,6 @@ export class Tag {
     @DeleteDateColumn()
     deletedAt: Date;
 
-    @ManyToMany(() => Post, (post) => post.tags)
+    @ManyToMany(() => Post, (post) => post.tags, { onDelete: 'CASCADE' })
     posts: Post[];
 }
