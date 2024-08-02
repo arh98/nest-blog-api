@@ -6,25 +6,27 @@ import { MetaOptionsModule } from './modules/meta-options/meta-options.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { UsersModule } from './modules/users/users.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import ormConfig from './config/ormConfig';
+import envValidation from './config/env.validation';
+
+const ENV = process.env.NODE_ENV;
 
 @Module({
     imports: [
         UsersModule,
         PostsModule,
         AuthModule,
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: !ENV ? '.env' : `.env.${ENV}`,
+            load: [ormConfig],
+            validationSchema: envValidation,
+        }),
         TypeOrmModule.forRootAsync({
-            imports: [],
-            inject: [],
-            useFactory: () => ({
-                type: 'postgres',
-                host: 'localhost',
-                port: 5432,
-                username: 'postgres',
-                password: 'p4321',
-                database: 'nestblog',
-                autoLoadEntities: true,
-                synchronize: true,
-            }),
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: ormConfig,
         }),
         TagsModule,
         MetaOptionsModule,
