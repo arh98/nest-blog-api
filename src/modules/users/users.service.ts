@@ -1,11 +1,18 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+    ConflictException,
+    forwardRef,
+    Inject,
+    Injectable,
+    NotFoundException,
+    RequestTimeoutException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { AuthService } from 'src/modules/auth/auth.service';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthService } from 'src/modules/auth/auth.service';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
 
 /**
  * Service for managing user-related operations.
@@ -27,48 +34,92 @@ export class UsersService {
      * Creates a new user.
      */
     async create(dto: CreateUserDto) {
-        const existingUser = await this.usersRepo.findOne({
-            where: { email: dto.email },
-        });
+        try {
+            const existingUser = await this.usersRepo.findOne({
+                where: { email: dto.email },
+            });
 
-        /**
-         * Handle exceptions if user exists later
-         * */
+            if (existingUser) {
+                throw new ConflictException(
+                    'User with this email already exists',
+                );
+            }
 
-        // Try to create a new user
-        // - Handle Exceptions Later
-        let newUser = this.usersRepo.create(dto);
-        newUser = await this.usersRepo.save(newUser);
-
-        // Create the user
-        return newUser;
+            const newUser = await this.usersRepo.save(
+                this.usersRepo.create(dto),
+            );
+            return newUser;
+        } catch (error) {
+            if (error instanceof ConflictException) {
+                throw error;
+            }
+            throw new RequestTimeoutException('Error saving user');
+        }
     }
 
     /**
      * Fetches a list of users based on the provided pagination query.
      */
-    findAll(dto: PaginationQueryDto) {
-        return `This action returns all users`;
+    async findAll(dto: PaginationQueryDto) {
+        try {
+            const users = await this.usersRepo.find({
+                skip: dto.offset,
+                take: dto.limit,
+            });
+            return users;
+        } catch (error) {
+            console.error('Error retrieving users:', error);
+            throw new RequestTimeoutException('Error retrieving users');
+        }
     }
 
     /**
      * Fetches a user by their ID.
      */
-    findOne(id: number) {
-        return this.usersRepo.findOneBy({ id });
+    async findOne(id: number) {
+        const user = await this.usersRepo.findOneBy({ id });
+        if (!user) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+        return user;
     }
 
     /**
      * Updates an existing user.
      */
-    update(id: number, dto: UpdateUserDto) {
-        return `This action updates a #${id} user`;
+    async update(id: number, dto: UpdateUserDto) {
+        try {
+            const existingUser = await this.findOne(id);
+
+            const updatedUser = await this.usersRepo.save({
+                ...existingUser,
+                ...dto,
+            });
+
+            return updatedUser;
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            console.error('Error updating user:', error);
+            throw new RequestTimeoutException('Error updating user');
+        }
     }
 
     /**
      * Removes a user by their ID.
      */
-    remove(id: number) {
-        return `This action removes a #${id} user`;
+    async remove(id: number) {
+        try {
+            const existingUser = await this.findOne(id);
+            await this.usersRepo.remove(existingUser);
+            return { message: `User with ID ${id} has been removed` };
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            console.error('Error removing user:', error);
+            throw new RequestTimeoutException('Error removing user');
+        }
     }
 }
