@@ -1,18 +1,17 @@
 import {
     ConflictException,
-    forwardRef,
-    Inject,
     Injectable,
     NotFoundException,
     RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { AuthService } from 'src/modules/auth/auth.service';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { CreateManyUsersDto } from '../dto/create-many-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { User } from '../entities/user.entity';
+import { CreateManyUsersService } from './create-many-users.service';
 
 /**
  * Service for managing user-related operations.
@@ -25,9 +24,7 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly usersRepo: Repository<User>,
-
-        @Inject(forwardRef(() => AuthService))
-        private readonly authService: AuthService,
+        private readonly createManyUsersSerice: CreateManyUsersService,
     ) {}
 
     /**
@@ -121,5 +118,9 @@ export class UsersService {
             console.error('Error removing user:', error);
             throw new RequestTimeoutException('Error removing user');
         }
+    }
+
+    async createMany(usersDto: CreateManyUsersDto) {
+        return await this.createManyUsersSerice.createMany(usersDto);
     }
 }

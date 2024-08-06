@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Query } from '@nestjs/common';
+import { Body, Controller, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import {
@@ -10,7 +10,8 @@ import {
 } from './decorators/handlers.decorators';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UsersService } from './users.service';
+import { UsersService } from './providers/users.service';
+import { CreateManyUsersDto } from './dto/create-many-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -40,5 +41,10 @@ export class UsersController {
     @deleteUserDecorators()
     remove(@Param('id') id: string) {
         return this.usersService.remove(+id);
+    }
+
+    @Post('create-many')
+    createMany(@Body() dto: CreateManyUsersDto) {
+        return this.usersService.createMany(dto);
     }
 }
