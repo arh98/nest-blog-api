@@ -6,6 +6,8 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { TagsService } from 'src/modules/tags/tags.service';
+import { GetPostsDto } from './dto/get-post.dto';
+import { PaginationService } from 'src/common/pagination/pagination.service';
 
 @Injectable()
 export class PostsService {
@@ -14,6 +16,7 @@ export class PostsService {
         private readonly postRepo: Repository<Post>,
         private readonly userService: UsersService,
         private readonly tagsService: TagsService,
+        private readonly paginationService: PaginationService,
     ) {}
 
     async create(dto: CreatePostDto) {
@@ -25,8 +28,12 @@ export class PostsService {
         );
     }
 
-    findAll() {
-        return this.postRepo.find();
+    findAll(dto: GetPostsDto) {
+        const posts = this.paginationService.paginateQuery(
+            { limit: dto.limit, page: dto.page },
+            this.postRepo,
+        );
+        return posts;
     }
 
     async findOne(id: number) {

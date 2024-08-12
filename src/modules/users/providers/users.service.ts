@@ -5,13 +5,13 @@ import {
     RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { Repository } from 'typeorm';
 import { CreateManyUsersDto } from '../dto/create-many-user.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { CreateManyUsersService } from './create-many-users.service';
+import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
 
 /**
  * Service for managing user-related operations.
@@ -60,7 +60,7 @@ export class UsersService {
     async findAll(dto: PaginationQueryDto) {
         try {
             const users = await this.usersRepo.find({
-                skip: dto.offset,
+                skip: dto.page,
                 take: dto.limit,
             });
             return users;

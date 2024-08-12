@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
 import {
     deleteUserDecorators,
     getUserDecorators,
@@ -8,10 +8,10 @@ import {
     patchUserDecorators,
     postUserDecorators,
 } from './decorators/handlers.decorators';
+import { CreateManyUsersDto } from './dto/create-many-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './providers/users.service';
-import { CreateManyUsersDto } from './dto/create-many-user.dto';
 
 @Controller('users')
 @ApiTags('Users')

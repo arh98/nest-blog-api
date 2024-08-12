@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
     createPostDecorators,
@@ -10,6 +10,7 @@ import {
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsService } from './posts.service';
+import { GetPostsDto } from './dto/get-post.dto';
 
 @Controller('posts')
 @ApiTags('Posts')
@@ -22,8 +23,8 @@ export class PostsController {
     }
 
     @getPostsDecorators()
-    findAll() {
-        return this.postsService.findAll();
+    findAll(@Query() dto: GetPostsDto) {
+        return this.postsService.findAll(dto);
     }
 
     @getPostDecorators()

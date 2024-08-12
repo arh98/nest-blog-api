@@ -11,10 +11,10 @@ export class PaginationQueryDto {
     })
     @IsOptional()
     @IsPositive()
-    limit: number;
+    readonly limit: number = 10;
 
     @ApiProperty({
-        name: 'offset',
+        name: 'page',
         type: 'number',
         required: false,
         description:
@@ -23,5 +23,5 @@ export class PaginationQueryDto {
     })
     @IsOptional()
     @IsPositive()
-    offset: number;
+    readonly page: number = 1;
 }
