@@ -1,18 +1,19 @@
+import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { MetaOption } from 'src/modules/meta-options/entities/meta-option.entity';
+import { Tag } from 'src/modules/tags/entities/tag.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 import {
     Column,
     Entity,
-    JoinColumn,
     JoinTable,
     ManyToMany,
     ManyToOne,
+    OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostType } from '../enums/post-type.enum';
-import { User } from 'src/modules/users/entities/user.entity';
-import { Tag } from 'src/modules/tags/entities/tag.entity';
 
 @Entity()
 export class Post {
@@ -85,4 +86,7 @@ export class Post {
         eager: true,
     })
     author: User;
+
+    @OneToMany(() => Comment, (comment) => comment.post)
+    comments: Comment[];
 }
