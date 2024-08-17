@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ObjectLiteral } from 'typeorm';
+import { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { REQUEST } from '@nestjs/core';
@@ -14,17 +14,35 @@ export class PaginationService {
     ) {}
     public async paginateQuery<T extends ObjectLiteral>(
         paginationQuery: PaginationQueryDto,
-        repository: Repository<T>,
+        source: Repository<T> | SelectQueryBuilder<T>,
+        relations: string[] = [],
     ) {
-        const results = await repository.find({
-            skip: (paginationQuery.page - 1) * paginationQuery.limit,
-            take: paginationQuery.limit,
-        });
+        const { limit, page } = paginationQuery;
+        const skippedItems = (page - 1) * limit;
+
+        let results: T[];
+        let totalItems: number;
+
+        if (source instanceof Repository) {
+            [results, totalItems] = await source.findAndCount({
+                skip: skippedItems,
+                take: limit,
+                relations,
+            });
+        } else if (source instanceof SelectQueryBuilder) {
+            [results, totalItems] = await source
+                .skip(skippedItems)
+                .take(limit)
+                .getManyAndCount();
+        } else {
+            throw new Error(
+                'Invalid source type. Expected Repository or SelectQueryBuilder.',
+            );
+        }
 
         const baseURL = this.req.protocol + '://' + this.req.headers.host + '/';
         const url = new URL(this.req.url, baseURL);
 
-        const totalItems = await repository.count();
         const totalPages = Math.ceil(totalItems / paginationQuery.limit);
         const nextPage =
             paginationQuery.page === totalPages
