@@ -1,5 +1,6 @@
 import { Body, Controller, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ParamId } from 'src/common/decorators/param-id.decorator';
 import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
 import {
     deleteUserDecorators,
@@ -29,18 +30,18 @@ export class UsersController {
     }
 
     @getUserDecorators()
-    findOne(@Param('id') id: string) {
-        return this.usersService.findOne(+id);
+    findOne(@ParamId() id: number) {
+        return this.usersService.findOne(id);
     }
 
     @patchUserDecorators()
-    update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-        return this.usersService.update(+id, dto);
+    update(@Param() id: number, @Body() dto: UpdateUserDto) {
+        return this.usersService.update(id, dto);
     }
 
     @deleteUserDecorators()
-    remove(@Param('id') id: string) {
-        return this.usersService.remove(+id);
+    remove(@ParamId() id: number) {
+        return this.usersService.remove(id);
     }
 
     @Post('create-many')
