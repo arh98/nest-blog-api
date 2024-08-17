@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import {
+    Injectable,
+    NotFoundException,
+    RequestTimeoutException,
+} from '@nestjs/common';
+import { DataSource, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -11,11 +15,10 @@ import { User } from '../users/entities/user.entity';
 export class CommentsService {
     constructor(
         @InjectRepository(Comment)
-        private commentsRepo: Repository<Comment>,
+        private readonly commentsRepo: Repository<Comment>,
         @InjectRepository(Post)
-        private postsRepo: Repository<Post>,
-        // @InjectRepository(User)
-        // private usersRepository: Repository<User>,
+        private readonly postsRepo: Repository<Post>,
+        private readonly dataSource: DataSource,
     ) {}
 
     async create(dto: CreateCommentDto) {
@@ -36,8 +39,18 @@ export class CommentsService {
         return this.commentsRepo.save(comment);
     }
 
-    async findAll(): Promise<Comment[]> {
-        return this.commentsRepo.find({ relations: ['post', 'author'] });
+    findAll(): Promise<Comment[]> {
+        return this.commentsRepo.find({
+            relations: ['post', 'author'],
+        });
+    }
+
+    async findMultiple(ids: number[]): Promise<Comment[]> {
+        return await this.commentsRepo.find({
+            where: {
+                id: In(ids),
+            },
+        });
     }
 
     async findOne(id: number): Promise<Comment> {
@@ -58,6 +71,8 @@ export class CommentsService {
 
         comment.content = dto.content ?? comment.content;
         comment.replyToId = dto.replyToId ?? comment.replyToId;
+        // admin access only
+        comment.approved = dto.approved ?? comment.approved;
         comment.edited = true;
 
         return this.commentsRepo.save(comment);
@@ -67,5 +82,32 @@ export class CommentsService {
         const comment = await this.findOne(id);
 
         await this.commentsRepo.remove(comment);
+    }
+
+    async approveMultiple(ids: number[]) {
+        const comments = await this.findMultiple(ids);
+        const qr = this.dataSource.createQueryRunner();
+        try {
+            await qr.connect();
+            await qr.startTransaction();
+            for (const comment of comments) {
+                comment.approved = true;
+            }
+            await qr.manager.save(comments);
+
+            await qr.commitTransaction();
+        } catch (error) {
+            await qr.rollbackTransaction();
+            throw new RequestTimeoutException('Operation timed out!');
+        } finally {
+            try {
+                await qr.release();
+                return 'Operation completed successfully!';
+            } catch (error) {
+                throw new RequestTimeoutException(
+                    'Could not release the query runner connection',
+                );
+            }
+        }
     }
 }

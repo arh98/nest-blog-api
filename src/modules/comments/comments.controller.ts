@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Delete,
+    Put,
+} from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -33,5 +41,10 @@ export class CommentsController {
     @Delete(':id')
     remove(@ParamId() id: number) {
         return this.commentsService.remove(id);
+    }
+
+    @Put('approve')
+    approveMultiple(@Body() body: { ids: number[] }) {
+        return this.commentsService.approveMultiple(body.ids);
     }
 }
