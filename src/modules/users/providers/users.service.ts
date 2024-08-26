@@ -1,17 +1,22 @@
 import {
     ConflictException,
+    forwardRef,
+    Inject,
     Injectable,
     NotFoundException,
     RequestTimeoutException,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { SignUpDto } from 'src/modules/auth/authentication/dto/sign-up.dto';
+import { HashingService } from 'src/modules/auth/hashing/hash.service';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateManyUsersDto } from '../dto/create-many-user.dto';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { CreateManyUsersService } from './create-many-users.service';
-import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 /**
  * Service for managing user-related operations.
@@ -25,12 +30,14 @@ export class UsersService {
         @InjectRepository(User)
         private readonly usersRepo: Repository<User>,
         private readonly createManyUsersSerice: CreateManyUsersService,
+        @Inject(forwardRef(() => HashingService))
+        private readonly hashService: HashingService,
     ) {}
 
     /**
      * Creates a new user.
      */
-    async create(dto: CreateUserDto) {
+    async create(dto: SignUpDto | CreateUserDto) {
         try {
             const existingUser = await this.usersRepo.findOne({
                 where: { email: dto.email },
@@ -43,14 +50,17 @@ export class UsersService {
             }
 
             const newUser = await this.usersRepo.save(
-                this.usersRepo.create(dto),
+                this.usersRepo.create({
+                    ...dto,
+                    password: await this.hashService.hash(dto.password),
+                }),
             );
             return newUser;
         } catch (error) {
             if (error instanceof ConflictException) {
                 throw error;
             }
-            throw new RequestTimeoutException('Error saving user');
+            throw new RequestTimeoutException('Unable to save user');
         }
     }
 
@@ -81,6 +91,40 @@ export class UsersService {
         return user;
     }
 
+    async findOneBy(where: FindOptionsWhere<User> | FindOptionsWhere<User>[]) {
+        let user = null;
+        try {
+            user = await this.usersRepo.findOneBy(where);
+        } catch (error) {
+            throw new RequestTimeoutException('Could not fetch the user');
+        }
+        if (!user) {
+            throw new UnauthorizedException('User does not exist');
+        }
+        return user;
+    }
+
+    async deActive(id: number) {
+        const user = await this.findOne(id);
+        user.active = false;
+        this.usersRepo.save(user).catch((err) => {
+            console.error(err.message);
+            throw new RequestTimeoutException('Unable to save the changes');
+        });
+    }
+
+    async updatePassword(userId: number, newPasswd: string) {
+        const user = await this.findOne(userId);
+        try {
+            const newPassHash = await this.hashService.hash(newPasswd);
+            user.password = newPassHash;
+            await this.usersRepo.save(user);
+        } catch (error) {
+            throw new Error(
+                'Failed to update password. Please try again later.',
+            );
+        }
+    }
     /**
      * Updates an existing user.
      */

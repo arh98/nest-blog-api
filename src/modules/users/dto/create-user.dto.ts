@@ -44,6 +44,14 @@ export class CreateUserDto {
     email: string;
 
     @ApiProperty({
+        description: 'The bio of the user',
+        example: '21 y.o. , designer from san francisco',
+    })
+    @IsString()
+    @IsOptional()
+    bio: string;
+
+    @ApiProperty({
         description: 'The password of the user',
         example: 'MyStrongPassword123!',
         minLength: 6,
@@ -52,7 +60,6 @@ export class CreateUserDto {
         format: 'password',
     })
     @IsString()
-    @IsNotEmpty()
     @MinLength(6)
     @Matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/, {
         message:
