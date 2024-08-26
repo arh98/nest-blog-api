@@ -1,17 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
+import { DataResponseInterceptor } from './common/interceptors/data-response.interceptor';
 import { PaginationModule } from './common/pagination/pagination.module';
+import appConfig from './config/app.config';
 import envValidation from './config/env.validation';
 import ormConfig from './config/ormConfig';
 import { AuthModule } from './modules/auth/auth.module';
+import { AccessTokenGuard } from './modules/auth/authentication/guards/accees-token.guard';
+import { AuthenticationGuard } from './modules/auth/authentication/guards/auth.guard';
 import { CommentsModule } from './modules/comments/comments.module';
+import { MailModule } from './modules/mail/mail.module';
+import { MeModule } from './modules/me/me.module';
 import { MetaOptionsModule } from './modules/meta-options/meta-options.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { UsersModule } from './modules/users/users.module';
-import { MeModule } from './modules/me/me.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -20,7 +26,7 @@ const ENV = process.env.NODE_ENV;
         ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: !ENV ? '.env' : `.env.${ENV}`,
-            load: [ormConfig],
+            load: [appConfig, ormConfig],
             validationSchema: envValidation,
         }),
         TypeOrmModule.forRootAsync({
@@ -36,8 +42,19 @@ const ENV = process.env.NODE_ENV;
         PaginationModule,
         CommentsModule,
         MeModule,
+        MailModule,
     ],
     controllers: [AppController],
-    providers: [],
+    providers: [
+        {
+            provide: APP_GUARD,
+            useClass: AuthenticationGuard,
+        },
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: DataResponseInterceptor,
+        },
+        AccessTokenGuard,
+    ],
 })
 export class AppModule {}
