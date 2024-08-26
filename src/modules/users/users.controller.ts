@@ -1,4 +1,12 @@
-import { Body, Controller, Param, Post, Query } from '@nestjs/common';
+import {
+    Body,
+    ClassSerializerInterceptor,
+    Controller,
+    Param,
+    Post,
+    Query,
+    UseInterceptors,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ParamId } from 'src/common/decorators/param-id.decorator';
 import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
@@ -14,38 +22,39 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './providers/users.service';
 
-@Controller('users')
 @ApiTags('Users')
+@Controller('users')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+    constructor(private readonly service: UsersService) {}
 
     @postUserDecorators()
     create(@Body() dto: CreateUserDto) {
-        return this.usersService.create(dto);
+        return this.service.create(dto);
     }
 
     @getUsersDecorators()
     findAll(@Query() dto: PaginationQueryDto) {
-        return this.usersService.findAll(dto);
+        return this.service.findAll(dto);
     }
 
     @getUserDecorators()
     findOne(@ParamId() id: number) {
-        return this.usersService.findOne(id);
+        return this.service.findOne(id);
     }
 
     @patchUserDecorators()
     update(@Param() id: number, @Body() dto: UpdateUserDto) {
-        return this.usersService.update(id, dto);
+        return this.service.update(id, dto);
     }
 
     @deleteUserDecorators()
     remove(@ParamId() id: number) {
-        return this.usersService.remove(id);
+        return this.service.remove(id);
     }
 
     @Post('create-many')
     createMany(@Body() dto: CreateManyUsersDto) {
-        return this.usersService.createMany(dto);
+        return this.service.createMany(dto);
     }
 }

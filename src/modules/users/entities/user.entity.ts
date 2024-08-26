@@ -3,6 +3,7 @@ import { Post } from 'src/modules/posts/entities/post.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Bookmark } from '../../me/entities/bookmark.entity';
 import { Follow } from '../../me/entities/follow.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -25,6 +26,12 @@ export class User {
     bio: string;
 
     @Column({
+        type: 'boolean',
+        default: true,
+    })
+    active: boolean;
+
+    @Column({
         type: 'varchar',
         length: 96,
         unique: true,
@@ -34,8 +41,18 @@ export class User {
     @Column({
         type: 'varchar',
         length: 96,
+        nullable: true,
     })
-    password: string;
+    @Exclude()
+    password?: string;
+
+    @Column({
+        type: 'varchar',
+        nullable: true,
+        length: 96,
+    })
+    @Exclude()
+    googleId?: string;
 
     @OneToMany(() => Post, (post) => post.author)
     posts: Post[];
