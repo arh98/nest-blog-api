@@ -1,29 +1,58 @@
 import {
     Body,
+    ClassSerializerInterceptor,
     Controller,
     Delete,
     Get,
     HttpCode,
     HttpStatus,
+    Patch,
     Post,
     Query,
+    UseInterceptors,
 } from '@nestjs/common';
 import { ParamId } from 'src/common/decorators/param-id.decorator';
 import { AddBookmarkDto } from './dto/add-bookmark.dto';
 import { BookmarkType } from './enums/bookmark-type.enum';
 import { BookmarkService } from './services/bookmarks.service';
 import { FollowService } from './services/follow.service';
+import { ActiveUser } from '../auth/decorators/active-user.decorator';
+import { IActiveUser } from '../auth/interfaces/active-user.interface';
+import { MeService } from './services/me.service';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('me')
+@ApiTags('me')
+@UseInterceptors(ClassSerializerInterceptor)
 export class MeController {
     constructor(
         private readonly bookmarkService: BookmarkService,
         private readonly followService: FollowService,
+        private readonly meService: MeService,
     ) {}
 
-    @Get('bookmarks/:userId')
+    @Get()
+    async getMe(@ActiveUser() user: IActiveUser) {
+        return this.meService.myProfile(user.sub);
+    }
+
+    @Patch()
+    async updateMe(
+        @ActiveUser() user: IActiveUser,
+        @Body() dto: UpdateUserDto,
+    ) {
+        return this.meService.updateMe(user.sub, dto);
+    }
+
+    @Delete()
+    async deleteMe(@ActiveUser() user: IActiveUser) {
+        return this.meService.deleteMe(user.sub);
+    }
+
+    @Get('bookmarks')
     async getBookmarksOrFavorites(
-        @ParamId('userId') userId: number,
+        @ActiveUser() user: IActiveUser,
         @Query('type') type?: string,
     ) {
         const bookmarkType =
@@ -32,41 +61,51 @@ export class MeController {
                 : BookmarkType.BOOKMARK;
 
         return this.bookmarkService.getBookmarksOrFavorites(
-            userId,
+            user.sub,
             bookmarkType,
         );
     }
 
     @Post('bookmarks')
-    async addBookmark(@Body() dto: AddBookmarkDto) {
-        return this.bookmarkService.addBookmarkOrFavorite(dto.userId, dto);
+    async addBookmark(
+        @ActiveUser() user: IActiveUser,
+        @Body() dto: AddBookmarkDto,
+    ) {
+        return this.bookmarkService.addBookmarkOrFavorite(user.sub, dto);
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete('bookmarks/:bookmarkId')
-    async removeBookmark(@ParamId('bookmarkId') bookmarkId: number) {
-        return this.bookmarkService.removeBookmark(bookmarkId);
+    async removeBookmark(
+        @ActiveUser() user: IActiveUser,
+        @ParamId('bookmarkId') bookmarkId: number,
+    ) {
+        return this.bookmarkService.removeBookmark(user.sub, bookmarkId);
     }
 
     @Post('follow/:userId')
-    async follow(@ParamId('userId') id: number) {
-        const myId = 2; // for now
-        return this.followService.follow(myId, id);
+    async follow(
+        @ActiveUser() user: IActiveUser,
+        @ParamId('userId') id: number,
+    ) {
+        return this.followService.follow(user.sub, id);
     }
 
     @Delete('unfollow/:userId')
-    async unfollow(@ParamId('userId') id: number) {
-        const myId = 2; // for now
-        return this.followService.unfollow(myId, id);
+    async unfollow(
+        @ActiveUser() user: IActiveUser,
+        @ParamId('userId') id: number,
+    ) {
+        return this.followService.unfollow(user.sub, id);
     }
 
-    @Get('followers/:userId')
-    async getFollowers(@ParamId('userId') userId: number) {
-        return this.followService.getFollowers(userId);
+    @Get('followers')
+    async getFollowers(@ActiveUser() user: IActiveUser) {
+        return this.followService.getFollowers(user.sub);
     }
 
-    @Get('following/:userId')
-    async getFollowing(@ParamId('userId') userId: number) {
-        return this.followService.getFollowing(userId);
+    @Get('following')
+    async getFollowing(@ActiveUser() user: IActiveUser) {
+        return this.followService.getFollowing(user.sub);
     }
 }
