@@ -2,10 +2,9 @@ import {
     Body,
     ClassSerializerInterceptor,
     Controller,
-    Param,
     Post,
     Query,
-    UseInterceptors,
+    UseInterceptors
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ParamId } from 'src/common/decorators/param-id.decorator';
@@ -17,7 +16,7 @@ import {
     patchUserDecorators,
     postUserDecorators,
 } from './decorators/handlers.decorators';
-import { CreateManyUsersDto } from './dto/create-many-user.dto';
+import { CreateMultipleUsersDto } from './dto/create-multiple-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './providers/users.service';
@@ -44,7 +43,7 @@ export class UsersController {
     }
 
     @patchUserDecorators()
-    update(@Param() id: number, @Body() dto: UpdateUserDto) {
+    update(@ParamId() id: number, @Body() dto: UpdateUserDto) {
         return this.service.update(id, dto);
     }
 
@@ -54,7 +53,7 @@ export class UsersController {
     }
 
     @Post('create-many')
-    createMany(@Body() dto: CreateManyUsersDto) {
-        return this.service.createMany(dto);
+    createMany(@Body() dto: CreateMultipleUsersDto) {
+        return this.service.createMultiple(dto);
     }
 }
