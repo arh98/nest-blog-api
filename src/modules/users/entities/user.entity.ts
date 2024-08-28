@@ -1,9 +1,9 @@
+import { Exclude } from 'class-transformer';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Bookmark } from '../../me/entities/bookmark.entity';
 import { Follow } from '../../me/entities/follow.entity';
-import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -32,6 +32,12 @@ export class User {
     active: boolean;
 
     @Column({
+        type: 'boolean',
+        default: false,
+    })
+    emailConfirmed: boolean;
+
+    @Column({
         type: 'varchar',
         length: 96,
         unique: true,
@@ -45,6 +51,14 @@ export class User {
     })
     @Exclude()
     password?: string;
+
+    @Column({ type: 'timestamp', nullable: true })
+    @Exclude()
+    resetTokenValidityDate: Date;
+
+    @Column({ type: 'timestamp', nullable: true })
+    @Exclude()
+    passwordChangedAt: Date;
 
     @Column({
         type: 'varchar',
