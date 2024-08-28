@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateUserDto } from './create-user.dto';
 
-export class CreateManyUsersDto {
+export class CreateMultipleUsersDto {
     @ApiProperty({
         type: 'array',
         required: true,
