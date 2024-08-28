@@ -18,6 +18,7 @@ export default Joi.object({
     JWT_REFRESH_EXP: Joi.number().required(),
     API_VERSION: Joi.string().required(),
     MAIL_HOST: Joi.string().required(),
+    MAIL_PORT: Joi.number().required(),
     MAIL_USER: Joi.string().required(),
     MAIL_PASSWORD: Joi.string().required(),
 });
