@@ -7,10 +7,11 @@ import { FollowService } from './services/follow.service';
 import { UsersModule } from '../users/users.module';
 import { PostsModule } from '../posts/posts.module';
 import { MeController } from './me.controller';
+import { MeService } from './services/me.service';
 
 @Module({
     controllers: [MeController],
-    providers: [BookmarkService, FollowService],
+    providers: [MeService, BookmarkService, FollowService],
     imports: [
         TypeOrmModule.forFeature([Bookmark, Follow]),
         UsersModule,
