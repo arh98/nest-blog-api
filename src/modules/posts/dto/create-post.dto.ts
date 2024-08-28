@@ -3,7 +3,6 @@ import {
     IsArray,
     IsDate,
     IsEnum,
-    IsInt,
     IsJSON,
     IsNotEmpty,
     IsOptional,
@@ -22,108 +21,105 @@ export class CreatePostDto {
     @ApiProperty({
         description: 'The title of the post',
         minLength: 4,
-        example: 'My First Blog Post',})
+        example: 'My First Blog Post',
+    })
     @IsString()
     @MinLength(4)
     @IsNotEmpty()
-    title: string;
-
+    readonly title: string;
 
     @ApiProperty({
         description: 'The type of the post',
         enum: PostType,
-        example: PostType.POST,})
+        example: PostType.POST,
+    })
     @IsEnum(PostType)
     @IsNotEmpty()
-    postType: PostType;
-
+    readonly postType: PostType;
 
     @ApiProperty({
         description: 'The status of the post',
         enum: PostStatus,
-        example: PostStatus.DRAFT,})
+        example: PostStatus.DRAFT,
+    })
     @IsEnum(PostStatus)
     @IsNotEmpty()
-    status: PostStatus;
-
+    readonly status: PostStatus;
 
     @ApiProperty({
         description: 'The slug of the post',
-        example: 'my-first-blog-post',})
+        example: 'my-first-blog-post',
+    })
     @IsString()
     @IsNotEmpty()
     @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
         message:
-            'A slug should be all small letters and uses only "-" and without spaces. For example "my-url"',})
-    slug: string;
-
+            'A slug should be all small letters and uses only "-" and without spaces. For example "my-url"',
+    })
+    readonly slug: string;
 
     @ApiPropertyOptional({
         description: 'The content of the post',
-        example: 'This is the content of my first blog post.',})
+        example: 'This is the content of my first blog post.',
+    })
     @IsOptional()
     @IsString()
-    content?: string;
-
+    readonly content?: string;
 
     @ApiPropertyOptional({
-        description: 'Serialize your JSON object else a validation error will be thrown',
-        example: '{\r\n "@context": "https://schema.org",\r\n "@type": "Person"\r\n }',})
+        description:
+            'Serialize your JSON object else a validation error will be thrown',
+        example:
+            '{\r\n "@context": "https://schema.org",\r\n "@type": "Person"\r\n }',
+    })
     @IsOptional()
     @IsJSON()
-    schema?: string;
-
+    readonly schema?: string;
 
     @ApiPropertyOptional({
         description: 'The URL of the featured image',
         format: 'uri',
-        example: 'https://example.com/featured-image.jpg',})
+        example: 'https://example.com/featured-image.jpg',
+    })
     @IsOptional()
     @IsUrl()
-    featuredImageUrl?: string;
-
+    readonly featuredImageUrl?: string;
 
     @ApiPropertyOptional({
-        description: 'The date and time (ISO8601) when the post should be published',
+        description:
+            'The date and time (ISO8601) when the post should be published',
         format: 'date-time',
-        example: '2024-03-16T07:46:32+0000',})
+        example: '2024-03-16T07:46:32+0000',
+    })
     @IsDate()
     @IsOptional()
-    publishOn?: Date;
-
+    readonly publishOn?: Date;
 
     @ApiPropertyOptional({
         description: 'The tags ids associated with the post',
         type: [Number],
-        example: [1, 2],})
+        example: [1, 2],
+    })
     @IsArray()
     @IsOptional()
-    tags?: number[];
+    readonly tags?: number[];
 
-    
     @ApiPropertyOptional({
         type: 'object',
         required: false,
         items: {
-          type: 'object',
-          properties: {
-            metavalue: {
-              type: 'json',
-              description: 'The metaValue is a JSON string',
-              example: '{"sidebarEnabled": true,}',
+            type: 'object',
+            properties: {
+                metavalue: {
+                    type: 'json',
+                    description: 'The metaValue is a JSON string',
+                    example: '{"sidebarEnabled": true,}',
+                },
             },
-          },
-        },})
+        },
+    })
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => CreateMetaOptionDto)
-    metaOptions?: CreateMetaOptionDto | null;
-
-    @ApiProperty({
-        type: 'integer',
-        required: true,
-        example: 1, })
-    @IsNotEmpty()
-    @IsInt()
-    authorId: number;
+    readonly metaOptions?: CreateMetaOptionDto | null;
 }
