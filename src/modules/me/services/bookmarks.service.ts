@@ -45,11 +45,15 @@ export class BookmarkService {
         return this.BookmarkRepo.save(bookmarks);
     }
 
-    async removeBookmark(id: number) {
+    async removeBookmark(userId: number, id: number) {
         const bookmark = await this.BookmarkRepo.findOne({
             where: { id },
         });
-
+        if (bookmark.user.id !== userId) {
+            throw new NotFoundException(
+                'User does not have permission to delete this bookmark',
+            );
+        }
         if (!bookmark) {
             throw new NotFoundException('Bookmark or favorite not found');
         }
