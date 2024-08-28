@@ -12,39 +12,46 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ParamId } from 'src/common/decorators/param-id.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { ActiveUser } from '../auth/decorators/active-user.decorator';
+import { IActiveUser } from '../auth/interfaces/active-user.interface';
 
 @Controller('comments')
 @ApiTags('comments')
 export class CommentsController {
-    constructor(private readonly commentsService: CommentsService) {}
+    constructor(private readonly service: CommentsService) {}
 
     @Post()
-    create(@Body() dto: CreateCommentDto) {
-        return this.commentsService.create(dto);
+    create(@ActiveUser() user: IActiveUser, @Body() dto: CreateCommentDto) {
+        return this.service.create(user.sub, dto);
     }
 
     @Get()
     findAll() {
-        return this.commentsService.findAll();
+        return this.service.findAll();
     }
 
     @Get(':id')
     findOne(@ParamId() id: number) {
-        return this.commentsService.findOne(id);
+        return this.service.findOne(id);
     }
 
     @Patch(':id')
-    update(@ParamId() id: number, @Body() dto: UpdateCommentDto) {
-        return this.commentsService.update(id, dto);
+    update(
+        @ParamId() id: number,
+        @ActiveUser()
+        user: IActiveUser,
+        @Body() dto: UpdateCommentDto,
+    ) {
+        return this.service.update(user, id, dto);
     }
 
     @Delete(':id')
     remove(@ParamId() id: number) {
-        return this.commentsService.remove(id);
+        return this.service.remove(id);
     }
 
     @Put('approve')
     approveMultiple(@Body() body: { ids: number[] }) {
-        return this.commentsService.approveMultiple(body.ids);
+        return this.service.approveMultiple(body.ids);
     }
 }

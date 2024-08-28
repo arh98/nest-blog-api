@@ -1,4 +1,5 @@
 import {
+    ForbiddenException,
     Injectable,
     NotFoundException,
     RequestTimeoutException,
@@ -9,7 +10,7 @@ import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Post } from '../posts/entities/post.entity';
-import { User } from '../users/entities/user.entity';
+import { IActiveUser } from '../auth/interfaces/active-user.interface';
 
 @Injectable()
 export class CommentsService {
@@ -21,7 +22,7 @@ export class CommentsService {
         private readonly dataSource: DataSource,
     ) {}
 
-    async create(dto: CreateCommentDto) {
+    async create(authorId: number, dto: CreateCommentDto) {
         const post = await this.postsRepo.findOne({
             where: { id: dto.postId },
         });
@@ -33,7 +34,7 @@ export class CommentsService {
         const comment = this.commentsRepo.create({
             ...dto,
             post,
-            author: { id: 1 }, // for now
+            author: { id: authorId },
         });
 
         return this.commentsRepo.save(comment);
@@ -66,14 +67,24 @@ export class CommentsService {
         return comment;
     }
 
-    async update(id: number, dto: UpdateCommentDto): Promise<Comment> {
+    async update(
+        user: IActiveUser,
+        id: number,
+        dto: UpdateCommentDto,
+    ): Promise<Comment> {
+        const isAdmin = true;
         const comment = await this.findOne(id);
 
+        if (!isAdmin && comment.author.id !== user.sub) {
+            throw new ForbiddenException(
+                'You are not authorized to update this comment',
+            );
+        }
         comment.content = dto.content ?? comment.content;
         comment.replyToId = dto.replyToId ?? comment.replyToId;
-        // admin access only
-        comment.approved = dto.approved ?? comment.approved;
         comment.edited = true;
+
+        if (isAdmin) comment.approved = dto.approved ?? comment.approved;
 
         return this.commentsRepo.save(comment);
     }
