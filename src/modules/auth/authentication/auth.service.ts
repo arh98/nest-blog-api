@@ -36,7 +36,7 @@ export class AuthService {
 
     async signUp(dto: CreateUserDto) {
         const user = await this.userService.create(dto);
-        await this.mailer.sendUserWelcome(user);
+        this.mailer.sendUserWelcome(user);
         return {
             message: `User ${user.id} signed up successfully`,
             tokens: await this.generateTokens(user),
@@ -217,6 +217,7 @@ export class AuthService {
         if (!isEqual) {
             throw new UnauthorizedException('Wrong password');
         }
+        return isEqual;
     }
 
     private async signToken<T>(
