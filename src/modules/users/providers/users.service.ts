@@ -5,18 +5,17 @@ import {
     Injectable,
     NotFoundException,
     RequestTimeoutException,
-    UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
 import { SignUpDto } from 'src/modules/auth/authentication/dto/sign-up.dto';
 import { HashingService } from 'src/modules/auth/hashing/hash.service';
 import { FindOptionsWhere, Repository } from 'typeorm';
-import { CreateManyUsersDto } from '../dto/create-many-user.dto';
+import { CreateMultipleUsersDto } from '../dto/create-multiple-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { CreateManyUsersService } from './create-many-users.service';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { CreateMultipleUsersService } from './create-multiple-users.service';
 
 /**
  * Service for managing user-related operations.
@@ -29,9 +28,9 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly usersRepo: Repository<User>,
-        private readonly createManyUsersSerice: CreateManyUsersService,
+        private readonly createMultipleUsersSerice: CreateMultipleUsersService,
         @Inject(forwardRef(() => HashingService))
-        private readonly hashService: HashingService,
+        private readonly hasher: HashingService,
     ) {}
 
     /**
@@ -52,7 +51,7 @@ export class UsersService {
             const newUser = await this.usersRepo.save(
                 this.usersRepo.create({
                     ...dto,
-                    password: await this.hashService.hash(dto.password),
+                    password: await this.hasher.hash(dto.password),
                 }),
             );
             return newUser;
@@ -98,9 +97,6 @@ export class UsersService {
         } catch (error) {
             throw new RequestTimeoutException('Could not fetch the user');
         }
-        if (!user) {
-            throw new UnauthorizedException('User does not exist');
-        }
         return user;
     }
 
@@ -116,8 +112,9 @@ export class UsersService {
     async updatePassword(userId: number, newPasswd: string) {
         const user = await this.findOne(userId);
         try {
-            const newPassHash = await this.hashService.hash(newPasswd);
+            const newPassHash = await this.hasher.hash(newPasswd);
             user.password = newPassHash;
+            user.passwordChangedAt = new Date(Date.now());
             await this.usersRepo.save(user);
         } catch (error) {
             throw new Error(
@@ -132,12 +129,9 @@ export class UsersService {
         try {
             const existingUser = await this.findOne(id);
 
-            const updatedUser = await this.usersRepo.save({
-                ...existingUser,
-                ...dto,
-            });
+            this.mapDtoToUser(existingUser, dto);
 
-            return updatedUser;
+            return await this.usersRepo.save(existingUser);
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
@@ -164,7 +158,24 @@ export class UsersService {
         }
     }
 
-    async createMany(usersDto: CreateManyUsersDto) {
-        return await this.createManyUsersSerice.createMany(usersDto);
+    async createMultiple(usersDto: CreateMultipleUsersDto) {
+        return await this.createMultipleUsersSerice.createMany(usersDto);
+    }
+
+    async saveChanges(user: User) {
+        return await this.usersRepo.save(user);
+    }
+
+    private mapDtoToUser(user: User, dto: UpdateUserDto): User {
+        if (dto.email && dto.email !== user.email) {
+            if (user.emailConfirmed) {
+                user.emailConfirmed = false;
+            }
+        }
+        user.firstName = dto.firstName ?? user.firstName;
+        user.lastName = dto.lastName ?? user.lastName;
+        user.email = dto.email ?? user.email;
+        user.bio = dto.bio ?? user.bio;
+        return user;
     }
 }
