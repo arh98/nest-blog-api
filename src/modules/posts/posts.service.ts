@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationService } from 'src/common/pagination/pagination.service';
 import { TagsService } from 'src/modules/tags/tags.service';
 import { UsersService } from 'src/modules/users/providers/users.service';
 import { EntityManager, Repository } from 'typeorm';
+import { IActiveUser } from '../auth/interfaces/active-user.interface';
 import { Comment } from '../comments/entities/comment.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostsDto } from './dto/get-post.dto';
@@ -22,13 +29,22 @@ export class PostsService {
         private readonly manager: EntityManager,
     ) {}
 
-    async create(dto: CreatePostDto) {
-        const author = await this.userService.findOne(dto.authorId);
+    async create(userId: number, dto: CreatePostDto) {
+        const author = await this.userService.findOne(userId);
         const tags = await this.tagService.findMultiple(dto.tags);
-
-        return await this.postRepo.save(
-            this.postRepo.create({ ...dto, author, tags }),
-        );
+        if (dto.tags.length !== tags.length) {
+            throw new BadRequestException('Please check your tag Ids');
+        }
+        try {
+            return await this.postRepo.save(
+                this.postRepo.create({ ...dto, author, tags }),
+            );
+        } catch (error) {
+            console.error('Error saving post:', error);
+            throw new ConflictException(
+                'Post could not be saved. Ensure the slug is unique.',
+            );
+        }
     }
     async findAll(dto: GetPostsDto) {
         const queryBuilder = this.postRepo
@@ -74,9 +90,17 @@ export class PostsService {
         return post;
     }
 
-    async update(id: number, dto: UpdatePostDto) {
+    async update(user: IActiveUser, id: number, dto: UpdatePostDto) {
         const isAdmin = true; // for now
+
+        const userObj = await this.userService.findOne(user.sub);
         let post = await this.findOne(id);
+
+        if (!isAdmin && userObj.id !== post.author.id) {
+            throw new ForbiddenException(
+                'You are not authorized to update this post',
+            );
+        }
         const tags = dto.tags && (await this.tagService.findMultiple(dto.tags));
 
         post = this.mapDtoToPost(post, dto);
