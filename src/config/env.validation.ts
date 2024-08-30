@@ -21,4 +21,8 @@ export default Joi.object({
     MAIL_PORT: Joi.number().required(),
     MAIL_USER: Joi.string().required(),
     MAIL_PASSWORD: Joi.string().required(),
+    LIARA_API_ENPOINT: Joi.string().required(),
+    LIARA_BUCKET_NAME: Joi.string().required(),
+    LIARA_ACC_KEY: Joi.string().required(),
+    LIARA_SECRET_KEY: Joi.string().required(),
 });

@@ -7,4 +7,8 @@ export default registerAs('appConfig', () => ({
     mailPort: process.env.MAIL_PORT,
     smtpUsername: process.env.MAIL_USER,
     smtpPassword: process.env.MAIL_PASSWORD,
+    awsBucketName: process.env.LIARA_BUCKET_NAME,
+    awsAccessKeyId: process.env.LIARA_ACC_KEY,
+    awsSecretAccessKey: process.env.LIARA_SECRET_KEY,
+    awsCloudfrontUrl: process.env.LIARA_API_ENPOINT,
 }));

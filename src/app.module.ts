@@ -18,6 +18,7 @@ import { MetaOptionsModule } from './modules/meta-options/meta-options.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { UsersModule } from './modules/users/users.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -43,6 +44,7 @@ const ENV = process.env.NODE_ENV;
         CommentsModule,
         MeModule,
         MailModule,
+        UploadsModule,
     ],
     controllers: [AppController],
     providers: [
