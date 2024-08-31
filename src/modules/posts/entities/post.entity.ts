@@ -1,3 +1,4 @@
+import { EntityBase } from 'src/common/entities/base.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { MetaOption } from 'src/modules/meta-options/entities/meta-option.entity';
 import { Tag } from 'src/modules/tags/entities/tag.entity';
@@ -10,16 +11,12 @@ import {
     ManyToOne,
     OneToMany,
     OneToOne,
-    PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostType } from '../enums/post-type.enum';
 
 @Entity()
-export class Post {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class Post extends EntityBase {
     @Column({
         type: 'varchar',
         length: 512,
@@ -67,7 +64,7 @@ export class Post {
     featuredImageUrl?: string;
 
     @Column({
-        type: 'timestamp', // 'datetime' in mysql
+        type: 'timestamp',
         nullable: true,
     })
     publishOn?: Date;

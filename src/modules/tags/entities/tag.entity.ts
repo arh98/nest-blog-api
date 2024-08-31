@@ -1,19 +1,9 @@
+import { EntityBase } from 'src/common/entities/base.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
-import {
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    ManyToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm';
+import { Column, DeleteDateColumn, Entity, ManyToMany } from 'typeorm';
 
 @Entity()
-export class Tag {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class Tag extends EntityBase {
     @Column({
         type: 'varchar',
         length: 256,
@@ -47,13 +37,7 @@ export class Tag {
     })
     featuredImage: string;
 
-    @CreateDateColumn()
-    createDate: Date;
-
-    @UpdateDateColumn()
-    updateDate: Date;
-
-    // Add this decorartor and column enables soft delete
+    // enables soft delete
     @DeleteDateColumn()
     deletedAt: Date;
 

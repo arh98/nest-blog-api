@@ -1,19 +1,10 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm';
-import { FileType } from '../enums/file-type.enum';
+import { EntityBase } from 'src/common/entities/base.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { FileType } from '../enums/file-type.enum';
 
 @Entity()
-export class Upload {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class Upload extends EntityBase {
     @Column({
         type: 'varchar',
         length: 1024,
@@ -47,10 +38,4 @@ export class Upload {
 
     @ManyToOne(() => Post)
     post: Post;
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
 }

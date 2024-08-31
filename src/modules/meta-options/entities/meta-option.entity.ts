@@ -1,29 +1,14 @@
+import { EntityBase } from 'src/common/entities/base.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinColumn,
-    OneToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
-export class MetaOption {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class MetaOption extends EntityBase {
     @Column({
         type: 'json',
     })
     metaValue: string;
 
-    @CreateDateColumn()
-    createDate: Date;
-
-    @UpdateDateColumn()
-    updateDate: Date;
     @OneToOne(() => Post, (post) => post.metaOptions, {
         onDelete: 'CASCADE',
     })

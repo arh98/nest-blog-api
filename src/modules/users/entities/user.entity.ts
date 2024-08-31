@@ -1,15 +1,13 @@
 import { Exclude } from 'class-transformer';
+import { EntityBase } from 'src/common/entities/base.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { Bookmark } from '../../me/entities/bookmark.entity';
 import { Follow } from '../../me/entities/follow.entity';
 
 @Entity()
-export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class User extends EntityBase {
     @Column({
         type: 'varchar',
         length: 96,

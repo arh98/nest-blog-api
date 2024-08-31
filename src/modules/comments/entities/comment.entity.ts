@@ -1,19 +1,10 @@
+import { EntityBase } from 'src/common/entities/base.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    CreateDateColumn,
-    UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('comments')
-export class Comment {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class Comment extends EntityBase {
     @Column('text')
     content: string;
 
@@ -30,16 +21,10 @@ export class Comment {
     replyToId: number;
 
     @Column({ default: 0 })
-    likes: number; 
+    likes: number;
 
     @Column({ default: 0 })
-    dislikes: number; 
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
+    dislikes: number;
 
     @ManyToOne(() => User, (user) => user.comments)
     author: User;
