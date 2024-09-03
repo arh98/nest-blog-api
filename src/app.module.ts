@@ -21,6 +21,7 @@ import { UploadsModule } from './modules/uploads/uploads.module';
 import { UsersModule } from './modules/users/users.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 const ENV = process.env.NODE_ENV;
 
@@ -37,6 +38,12 @@ const ENV = process.env.NODE_ENV;
             inject: [ConfigService],
             useFactory: ormConfig,
         }),
+        ThrottlerModule.forRoot([
+            {
+                ttl: 60000,
+                limit: 10,
+            },
+        ]),
         UsersModule,
         PostsModule,
         AuthModule,
@@ -52,6 +59,10 @@ const ENV = process.env.NODE_ENV;
     ],
     controllers: [AppController],
     providers: [
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+        },
         {
             provide: APP_GUARD,
             useClass: AuthenticationGuard,

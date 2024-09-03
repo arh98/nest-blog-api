@@ -28,7 +28,7 @@ export class UploadsController {
     @Post('file')
     public uploadFile(
         @UploadedFile() file: Express.Multer.File,
-        @Body('postId') postId: number, // Accept postId from the request body
+        @Body('postId') postId: number, 
     ) {
         return this.service.uploadFile(file, postId);
     }
