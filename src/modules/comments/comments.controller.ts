@@ -6,6 +6,7 @@ import {
     Patch,
     Delete,
     Put,
+    UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -14,12 +15,16 @@ import { ParamId } from 'src/common/decorators/param-id.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { IActiveUser } from '../auth/interfaces/active-user.interface';
+import { PermissionGuard } from '../auth/authorization/guards/permission.guard';
+import { UnrestrictedAccess } from '../auth/authorization/decorators/unrestricted-access.decorator';
 
+@UseGuards(PermissionGuard)
 @Controller('comments')
 @ApiTags('comments')
 export class CommentsController {
     constructor(private readonly service: CommentsService) {}
 
+    @UnrestrictedAccess()
     @Post()
     create(@ActiveUser() user: IActiveUser, @Body() dto: CreateCommentDto) {
         return this.service.create(user.sub, dto);
@@ -35,6 +40,7 @@ export class CommentsController {
         return this.service.findOne(id);
     }
 
+    @UnrestrictedAccess()
     @Patch(':id')
     update(
         @ParamId() id: number,

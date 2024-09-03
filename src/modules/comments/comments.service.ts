@@ -72,10 +72,9 @@ export class CommentsService {
         id: number,
         dto: UpdateCommentDto,
     ): Promise<Comment> {
-        const isAdmin = true;
         const comment = await this.findOne(id);
 
-        if (!isAdmin && comment.author.id !== user.sub) {
+        if (comment.author.id !== user.sub) {
             throw new ForbiddenException(
                 'You are not authorized to update this comment',
             );
@@ -83,8 +82,6 @@ export class CommentsService {
         comment.content = dto.content ?? comment.content;
         comment.replyToId = dto.replyToId ?? comment.replyToId;
         comment.edited = true;
-
-        if (isAdmin) comment.approved = dto.approved ?? comment.approved;
 
         return this.commentsRepo.save(comment);
     }
