@@ -2,7 +2,15 @@ import { Exclude } from 'class-transformer';
 import { EntityBase } from 'src/common/entities/base.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Role } from 'src/modules/roles/entities/role.entity';
+import {
+    BeforeInsert,
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+} from 'typeorm';
 import { Bookmark } from '../../me/entities/bookmark.entity';
 import { Follow } from '../../me/entities/follow.entity';
 
@@ -11,12 +19,14 @@ export class User extends EntityBase {
     @Column({
         type: 'varchar',
         length: 96,
+        nullable: true,
     })
     firstName: string;
 
     @Column({
         type: 'varchar',
         length: 96,
+        nullable: true,
     })
     lastName: string;
 
@@ -80,4 +90,13 @@ export class User extends EntityBase {
 
     @OneToMany(() => Follow, (follow) => follow.following)
     following: Follow[];
+
+    @ManyToOne(() => Role)
+    @JoinColumn()
+    role: Role;
+
+    @BeforeInsert()
+    setDefaultRole() {
+        this.role = { id: 5 } as Role;
+    }
 }
