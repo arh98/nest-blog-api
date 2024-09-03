@@ -100,6 +100,21 @@ export class UsersService {
         return user;
     }
 
+    async findOneByEmailForAuth(email: string) {
+        let user = null;
+        try {
+            user = await this.usersRepo
+                .createQueryBuilder('user')
+                .leftJoin('user.role', 'role')
+                .select(['user.id', 'user.email', 'user.password', 'role.id'])
+                .where('user.email = :email', { email })
+                .getOne();
+        } catch (error) {
+            throw new RequestTimeoutException('Could not fetch the user');
+        }
+        return user;
+    }
+
     async deActive(id: number) {
         const user = await this.findOne(id);
         user.active = false;
