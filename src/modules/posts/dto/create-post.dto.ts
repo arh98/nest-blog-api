@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
     IsArray,
     IsDate,
@@ -12,10 +13,8 @@ import {
     MinLength,
     ValidateNested,
 } from 'class-validator';
-import { PostStatus } from '../enums/post-status.enum';
-import { PostType } from '../enums/post-type.enum';
 import { CreateMetaOptionDto } from '../../meta-options/dto/create-meta-option.dto';
-import { Type } from 'class-transformer';
+import { PostType } from '../enums/post-type.enum';
 
 export class CreatePostDto {
     @ApiProperty({
@@ -36,15 +35,6 @@ export class CreatePostDto {
     @IsEnum(PostType)
     @IsNotEmpty()
     readonly postType: PostType;
-
-    @ApiProperty({
-        description: 'The status of the post',
-        enum: PostStatus,
-        example: PostStatus.DRAFT,
-    })
-    @IsEnum(PostStatus)
-    @IsNotEmpty()
-    readonly status: PostStatus;
 
     @ApiProperty({
         description: 'The slug of the post',
