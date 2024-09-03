@@ -6,6 +6,7 @@ import { UsersModule } from 'src/modules/users/users.module';
 import { Post } from './entities/post.entity';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
+import { RolesModule } from '../roles/roles.module';
 
 @Module({
     controllers: [PostsController],
@@ -15,6 +16,7 @@ import { PostsService } from './posts.service';
         TagsModule,
         PaginationModule,
         TypeOrmModule.forFeature([Post]),
+        RolesModule,
     ],
     exports: [PostsService],
 })

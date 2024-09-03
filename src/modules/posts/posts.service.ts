@@ -17,6 +17,7 @@ import { GetPostsDto } from './dto/get-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { PostStatus } from './enums/post-status.enum';
+import { UpdatePostStatusDto } from './dto/update-post-status.dto';
 
 @Injectable()
 export class PostsService {
@@ -46,18 +47,13 @@ export class PostsService {
             );
         }
     }
-    async findAll(dto: GetPostsDto) {
-        const queryBuilder = this.postRepo
-            .createQueryBuilder('post')
-            .leftJoinAndSelect('post.author', 'author')
-            .leftJoinAndSelect('post.tags', 'tags')
-            // .where('post.status = :status', { status: PostStatus.PUBLISHED })
-            .select(['post', 'author.id', 'tags.id']);
 
-        return this.paginationService.paginateQuery(
-            { limit: dto.limit, page: dto.page },
-            queryBuilder,
-        );
+    async findUnpublishedPosts(dto: GetPostsDto) {
+        return this.paginatePosts(dto, null);
+    }
+
+    async findPublishedPosts(dto: GetPostsDto) {
+        return this.paginatePosts(dto, PostStatus.PUBLISHED);
     }
 
     async findAllWithRelations(dto: GetPostsDto) {
@@ -91,12 +87,10 @@ export class PostsService {
     }
 
     async update(user: IActiveUser, id: number, dto: UpdatePostDto) {
-        const isAdmin = true; // for now
-
         const userObj = await this.userService.findOne(user.sub);
         let post = await this.findOne(id);
 
-        if (!isAdmin && userObj.id !== post.author.id) {
+        if (userObj.id !== post.author.id) {
             throw new ForbiddenException(
                 'You are not authorized to update this post',
             );
@@ -104,9 +98,14 @@ export class PostsService {
         const tags = dto.tags && (await this.tagService.findMultiple(dto.tags));
 
         post = this.mapDtoToPost(post, dto);
-        if (isAdmin) post.status = dto.status ?? post.status;
         if (tags) post.tags = tags;
 
+        return await this.postRepo.save(post);
+    }
+
+    async updatePostStatus(id: number, dto: UpdatePostStatusDto) {
+        const post = await this.findOne(id);
+        post.status = dto.status;
         return await this.postRepo.save(post);
     }
 
@@ -114,6 +113,24 @@ export class PostsService {
         const post = await this.findOne(id);
         await this.postRepo.delete(post.id);
         return 'Post deleted successfully';
+    }
+
+    private async paginatePosts(dto: GetPostsDto, status: PostStatus | null) {
+        const queryBuilder = this.postRepo
+            .createQueryBuilder('post')
+            .leftJoinAndSelect('post.author', 'author')
+            .leftJoinAndSelect('post.tags', 'tags');
+
+        if (status !== null) {
+            queryBuilder.where('post.status = :status', { status });
+        }
+
+        queryBuilder.select(['post', 'author.id', 'tags.id']);
+
+        return this.paginationService.paginateQuery(
+            { limit: dto.limit, page: dto.page },
+            queryBuilder,
+        );
     }
 
     private mapDtoToPost(post: Post, dto: UpdatePostDto): Post {
