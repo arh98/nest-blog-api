@@ -8,7 +8,6 @@ import {
     Post,
     Query,
 } from '@nestjs/common';
-import { CreateUserDto } from '../../users/dto/create-user.dto';
 import { ActiveUser } from '../decorators/active-user.decorator';
 import { Auth } from '../decorators/auth-type.decorator';
 import { IActiveUser } from '../interfaces/active-user.interface';
@@ -18,6 +17,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignInDto } from './dto/sign-in.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AuthType } from './enums/auth-type.enum';
 
@@ -33,7 +33,7 @@ export class AuthController {
     }
 
     @Post('sign-up')
-    async signUp(@Body() dto: CreateUserDto) {
+    async signUp(@Body() dto: SignUpDto) {
         return this.service.signUp(dto);
     }
 

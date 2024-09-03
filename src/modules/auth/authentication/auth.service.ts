@@ -10,7 +10,6 @@ import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import { MailService } from 'src/modules/mail/mail.service';
-import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { User } from 'src/modules/users/entities/user.entity';
 import { UsersService } from 'src/modules/users/providers/users.service';
 import jwtConfig from '../config/jwt.config';
@@ -18,6 +17,7 @@ import { HashingService } from '../hashing/hash.service';
 import { IActiveUser } from '../interfaces/active-user.interface';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { SignInDto } from './dto/sign-in.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { RefreshTokenIdsStorage } from './services/refresh-token-ids.service';
 
@@ -34,7 +34,7 @@ export class AuthService {
         private readonly mailer: MailService,
     ) {}
 
-    async signUp(dto: CreateUserDto) {
+    async signUp(dto: SignUpDto) {
         const user = await this.userService.create(dto);
         this.mailer.sendUserWelcome(user);
         return {
@@ -44,9 +44,7 @@ export class AuthService {
     }
 
     async signIn(dto: SignInDto) {
-        const user = await this.userService.findOneBy({
-            email: dto.email,
-        });
+        const user = await this.userService.findOneByEmailForAuth(dto.email);
 
         const isPasswordValid = user
             ? await this.isPasswordCorrect(dto.password, user.password)
@@ -66,16 +64,14 @@ export class AuthService {
 
         const accTokenExp = this.jwtConf.accessTokenTtl;
         const secret = this.jwtConf.secret;
-
         const [accessToken, refreshToken] = await Promise.all([
             this.signToken<Partial<IActiveUser>>(user.id, accTokenExp, secret, {
                 email: user.email,
-                // role: user.role,
-                // make jwt heavy!!
-                // permissions: user.permissions
+                roleId: user.role.id,
             }),
             this.signToken(user.id, refreshTokenExp, secret, {
                 refreshTokenId,
+                email: user.email,
             }),
         ]);
         await this.idsStorage.insert(user.id, refreshTokenId);
@@ -85,15 +81,16 @@ export class AuthService {
 
     async refreshTokens(dto: RefreshTokenDto) {
         try {
-            const { sub, refreshTokenId } = await this.jwtService.verifyAsync<
-                Pick<IActiveUser, 'sub'> & { refreshTokenId: string }
-            >(dto.refreshToken, {
-                secret: this.jwtConf.secret,
-                audience: this.jwtConf.audience,
-                issuer: this.jwtConf.issuer,
-            });
-            const user = await this.userService.findOne(sub);
-
+            const { refreshTokenId, email } =
+                await this.jwtService.verifyAsync<{
+                    refreshTokenId: string;
+                    email: string;
+                }>(dto.refreshToken, {
+                    secret: this.jwtConf.secret,
+                    audience: this.jwtConf.audience,
+                    issuer: this.jwtConf.issuer,
+                });
+            const user = await this.userService.findOneByEmailForAuth(email);
             const isValid = await this.idsStorage.validate(
                 user.id,
                 refreshTokenId,
@@ -123,7 +120,7 @@ export class AuthService {
     }
 
     async forgotPassword(email: string) {
-        const user = await this.userService.findOneBy({ email });
+        const user = await this.userService.findOneByEmailForAuth(email);
 
         if (user) {
             const expIn = 3600;
