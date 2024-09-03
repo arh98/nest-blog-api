@@ -17,8 +17,10 @@ import { MeModule } from './modules/me/me.module';
 import { MetaOptionsModule } from './modules/meta-options/meta-options.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { TagsModule } from './modules/tags/tags.module';
-import { UsersModule } from './modules/users/users.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { UsersModule } from './modules/users/users.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -45,6 +47,8 @@ const ENV = process.env.NODE_ENV;
         MeModule,
         MailModule,
         UploadsModule,
+        RolesModule,
+        PermissionsModule,
     ],
     controllers: [AppController],
     providers: [
